@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OnionSight AI</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f4f7f4;
+      color: #1f2937;
+    }
+
+    header {
+      background: #1b5e20;
+      color: white;
+      padding: 18px 8%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 24px;
+    }
+
+    header span {
+      font-size: 14px;
+      opacity: 0.9;
+    }
+
+    .container {
+      width: min(1100px, 92%);
+      margin: 30px auto;
+    }
+
+    .hero,
+    .analysis-box {
+      background: white;
+      padding: 28px;
+      border-radius: 16px;
+      box-shadow: 0 5px 18px rgba(0, 0, 0, 0.08);
+      margin-bottom: 24px;
+    }
+
+    .hero h2,
+    .analysis-box h2 {
+      margin-top: 0;
+      color: #1b5e20;
+    }
+
+    .grid,
+    .result-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .card,
+    .result-item {
+      background: white;
+      padding: 16px;
+      border-radius: 12px;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.07);
+      border-left: 5px solid #43a047;
+    }
+
+    .card h3 {
+      margin: 0 0 8px;
+      color: #166534;
+      font-size: 17px;
+    }
+
+    .card p {
+      margin: 0;
+      color: #475569;
+    }
+
+    .result-item {
+      border: 1px solid #bbf7d0;
+    }
+
+    .result-item strong {
+      display: block;
+      color: #166534;
+      font-size: 21px;
+      margin-top: 6px;
+    }
+
+    input[type="file"] {
+      width: 100%;
+      padding: 14px;
+      border: 2px dashed #43a047;
+      border-radius: 10px;
+      background: #f0fdf4;
+      margin: 12px 0 16px;
+    }
+
+    button {
+      border: none;
+      border-radius: 8px;
+      padding: 12px 18px;
+      font-size: 15px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-right: 10px;
+      margin-top: 10px;
+    }
+
+    .primary-btn {
+      background: #1b5e20;
+      color: white;
+    }
+
+    .primary-btn:hover {
+      background: #14532d;
+    }
+
+    .secondary-btn {
+      background: #e2e8f0;
+      color: #1e293b;
+    }
+
+    button:disabled {
+      cursor: not-allowed;
+      opacity: 0.65;
+    }
+
+    #preview,
+    #annotatedImage {
+      display: none;
+      width: 100%;
+      max-height: 400px;
+      object-fit: contain;
+      border-radius: 12px;
+      border: 1px solid #cbd5e1;
+      margin: 18px 0;
+      background: #f8fafc;
+    }
+
+    #annotatedImage {
+      border: 2px solid #43a047;
+    }
+
+    #result {
+      display: none;
+      margin-top: 24px;
+      padding: 22px;
+      border-radius: 12px;
+      background: #ecfdf5;
+      border: 1px solid #86efac;
+    }
+
+    .status {
+      display: inline-block;
+      background: #dcfce7;
+      color: #166534;
+      padding: 7px 10px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: bold;
+    }
+
+    footer {
+      text-align: center;
+      color: #64748b;
+      padding: 25px;
+      font-size: 14px;
+    }
+
+    @media (max-width: 600px) {
+      header {
+        padding: 16px;
+        display: block;
+      }
+
+      header span {
+        display: block;
+        margin-top: 5px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <h1>OnionSight AI</h1>
+    <span>AI-Assisted Onion Lot Quality Assessment</span>
+  </header>
+
+  <main class="container">
+    <section class="hero">
+      <h2>Procurement Dashboard</h2>
+      <p>
+        Upload an onion-lot image for AI-assisted onion detection,
+        approximate size estimation, quality grading, and report generation.
+      </p>
+      <span class="status">System Status: Ready for Analysis</span>
+    </section>
+
+    <section class="grid">
+      <div class="card">
+        <h3>Total Lots Analysed</h3>
+        <p>12 lots</p>
+      </div>
+
+      <div class="card">
+        <h3>Pending Human Review</h3>
+        <p>2 low-confidence cases</p>
+      </div>
+
+      <div class="card">
+        <h3>Latest Grade A Result</h3>
+        <p>78.5%</p>
+      </div>
+
+      <div class="card">
+        <h3>Offline Sync Status</h3>
+        <p>All reports synced</p>
+      </div>
+    </section>
+
+    <section class="analysis-box">
+      <h2>New Lot Analysis</h2>
+      <p>Select a clear onion-lot image with the reference marker visible.</p>
+
+      <input type="file" id="imageInput" accept="image/*">
+
+      <img id="preview" alt="Selected onion lot preview">
+
+      <button id="analyzeButton" class="primary-btn" onclick="analyzeImage()">
+        Analyze Image
+      </button>
+
+      <button class="secondary-btn" onclick="resetAnalysis()">
+        Reset
+      </button>
+
+      <div id="result">
+        <h2 id="resultTitle">AI Analysis Result</h2>
+
+        <p id="analysisStatus">
+          <strong>Analysis Status:</strong> Completed — Human verification recommended.
+        </p>
+
+        <img id="annotatedImage" alt="YOLO annotated detection result">
+
+        <div class="result-grid">
+          <div class="result-item">
+            Onion Count
+            <strong id="onionCount">0</strong>
+          </div>
+
+          <div class="result-item">
+            Approx. Avg. Size
+            <strong id="averageSize">0 mm</strong>
+          </div>
+
+          <div class="result-item">
+            Grade A
+            <strong id="gradeA">0%</strong>
+          </div>
+
+          <div class="result-item">
+            URS
+            <strong id="urs">0%</strong>
+          </div>
+
+          <div class="result-item">
+            AI Confidence
+            <strong id="confidence">0%</strong>
+          </div>
+
+          <div class="result-item">
+            Report ID
+            <strong id="reportId">ON-AI-001</strong>
+          </div>
+        </div>
+
+        <button class="primary-btn" onclick="generateReport()">
+          Generate Report PDF
+        </button>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    OnionSight AI Prototype | Human-Verified, Traceable Quality Assessment
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@3.0.1/dist/jspdf.umd.min.js"></script>
+
+  <script>
+    const imageInput = document.getElementById("imageInput");
+    const preview = document.getElementById("preview");
+    const result = document.getElementById("result");
+    const annotatedImage = document.getElementById("annotatedImage");
+    const analyzeButton = document.getElementById("analyzeButton");
+
+    imageInput.addEventListener("change", function () {
+      const file = this.files[0];
+
+      if (file) {
+        preview.src = URL.createObjectURL(file);
+        preview.style.display = "block";
+        result.style.display = "none";
+        annotatedImage.style.display = "none";
+      }
+    });
+
+    async function analyzeImage() {
+      const file = imageInput.files[0];
+
+      if (!file) {
+        alert("Please upload an onion-lot image first.");
+        return;
+      }
+
+      analyzeButton.textContent = "Analyzing...";
+      analyzeButton.disabled = true;
+
+      const formData = new FormData();
+      formData.append("file", file);
+
+      try {
+        const response = await fetch("http://127.0.0.1:8000/analyze", {
+          method: "POST",
+          body: formData
+        });
+
+        if (!response.ok) {
+          throw new Error(`Analysis failed: ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        document.getElementById("onionCount").textContent =
+          data.total_detections ?? 0;
+
+        document.getElementById("averageSize").textContent =
+          `${data.average_size_mm ?? 0} mm`;
+
+        document.getElementById("gradeA").textContent =
+          `${data.grade_a_percent ?? 0}%`;
+
+        document.getElementById("urs").textContent =
+          `${data.urs_percent ?? 0}%`;
+
+        const confidenceValue = data.average_confidence
+          ? Math.round(data.average_confidence * 100)
+          : 0;
+
+        document.getElementById("confidence").textContent =
+          `${confidenceValue}%`;
+
+        const reportId =
+          `ON-AI-${new Date().toISOString().replace(/[-:.TZ]/g, "").slice(0, 14)}`;
+
+        document.getElementById("reportId").textContent = reportId;
+
+        if (data.annotated_image) {
+          annotatedImage.src = data.annotated_image;
+          annotatedImage.style.display = "block";
+        }
+
+        if ((data.total_detections ?? 0) > 0) {
+          document.getElementById("resultTitle").textContent =
+            "YOLO Detection Result";
+
+          document.getElementById("analysisStatus").innerHTML =
+            "<strong>Analysis Status:</strong> Completed — Human verification recommended.";
+        } else {
+          document.getElementById("resultTitle").textContent =
+            "No Onion Detections Found";
+
+          document.getElementById("analysisStatus").innerHTML =
+            "<strong>Analysis Status:</strong> The AI completed analysis but detected no onions in this image.";
+        }
+
+        result.style.display = "block";
+        result.scrollIntoView({ behavior: "smooth" });
+      } catch (error) {
+        console.error(error);
+
+        alert(
+          "Analysis failed. Keep the backend terminal running with:\n\n" +
+          "python -m uvicorn backend.main:app --reload"
+        );
+      } finally {
+        analyzeButton.textContent = "Analyze Image";
+        analyzeButton.disabled = false;
+      }
+    }
+
+    function resetAnalysis() {
+      imageInput.value = "";
+
+      preview.src = "";
+      preview.style.display = "none";
+
+      annotatedImage.src = "";
+      annotatedImage.style.display = "none";
+
+      result.style.display = "none";
+    }
+
+    function generateReport() {
+      if (!window.jspdf) {
+        alert(
+          "PDF library did not load. Check internet connection, then refresh the page."
+        );
+        return;
+      }
+
+      const { jsPDF } = window.jspdf;
+      const pdf = new jsPDF();
+
+      const onionCount = document.getElementById("onionCount").textContent;
+      const averageSize = document.getElementById("averageSize").textContent;
+      const gradeA = document.getElementById("gradeA").textContent;
+      const urs = document.getElementById("urs").textContent;
+      const confidence = document.getElementById("confidence").textContent;
+      const reportId = document.getElementById("reportId").textContent;
+
+      pdf.setFillColor(27, 94, 32);
+      pdf.rect(0, 0, 210, 30, "F");
+
+      pdf.setTextColor(255, 255, 255);
+      pdf.setFontSize(20);
+      pdf.text("OnionSight AI", 15, 19);
+
+      pdf.setTextColor(31, 41, 55);
+      pdf.setFontSize(16);
+      pdf.text("Onion Lot Quality Assessment Report", 15, 45);
+
+      pdf.setFontSize(11);
+      pdf.text(`Report ID: ${reportId}`, 15, 56);
+      pdf.text(`Generated: ${new Date().toLocaleString()}`, 15, 64);
+      pdf.text("Status: Pending Human Verification", 15, 72);
+
+      pdf.setDrawColor(67, 160, 71);
+      pdf.line(15, 78, 195, 78);
+
+      pdf.setFontSize(14);
+      pdf.text("AI Analysis Results", 15, 91);
+
+      pdf.setFontSize(12);
+      pdf.text(`Total Onion Detections: ${onionCount}`, 20, 104);
+      pdf.text(`Approximate Average Size: ${averageSize}`, 20, 114);
+      pdf.text(`Grade A Percentage: ${gradeA}`, 20, 124);
+      pdf.text(`URS Percentage: ${urs}`, 20, 134);
+      pdf.text(`AI Confidence: ${confidence}`, 20, 144);
+
+      if (
+        annotatedImage.src &&
+        annotatedImage.src.startsWith("data:image")
+      ) {
+        try {
+          pdf.setFontSize(14);
+          pdf.text("Annotated Detection Image", 15, 160);
+
+          pdf.addImage(
+            annotatedImage.src,
+            "JPEG",
+            15,
+            168,
+            180,
+            105
+          );
+        } catch (error) {
+          console.warn("Annotated image could not be added to PDF.", error);
+        }
+      }
+
+      pdf.setFontSize(9);
+      pdf.setTextColor(100, 116, 139);
+      pdf.text(
+        "OnionSight AI Prototype — AI output requires human verification.",
+        15,
+        287
+      );
+
+      pdf.save(`${reportId}.pdf`);
+    }
+  </script>
+</body>
+</html>
