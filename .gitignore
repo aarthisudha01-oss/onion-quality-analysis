@@ -1,0 +1,12 @@
+__pycache__/
+*.pyc
+.venv/
+venv/
+.env
+
+Onion Grading Dataset/
+runs/
+src/
+onion-backend/
+
+*.pt
